@@ -18,7 +18,7 @@ export const fetchDoctors = async () => {
 export const createDoctor = async (doctorData) => {
   try {
     console.log(doctorData)
-    const response = await fetch('http://city-server-production.up.railway.app/api/v1/doctors', {
+    const response = await fetch('https://city-server-production.up.railway.app/api/v1/doctors', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
