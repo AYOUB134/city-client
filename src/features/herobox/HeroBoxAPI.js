@@ -1,4 +1,4 @@
-const BASE_URL = 'http://city-server-production.up.railway.app/api/v1';
+const BASE_URL = 'https://city-server-production.up.railway.app/api/v1';
 
 export const fetchPatients = async () => {
   const response = await fetch(`${BASE_URL}/patients`);
