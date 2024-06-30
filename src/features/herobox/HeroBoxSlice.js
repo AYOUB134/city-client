@@ -1,20 +1,36 @@
-// src/features/herobox/HeroBoxSlice.js
+// PatientSlice.js
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchPatients, createPatient } from './HeroBoxAPI';
+import { fetchPatients, createPatient } from './HeroBoxAPI'; // Adjust path as necessary
 
-export const getPatients = createAsyncThunk('herobox/getPatients', async () => {
-  const response = await fetchPatients();
-  return response;
-});
+export const getPatientsAsync = createAsyncThunk(
+  'patients/getPatients',
+  async () => {
+    try {
+      const response = await fetchPatients();
+      return response;
+    } catch (error) {
+      throw error; // Let the calling code handle the error
+    }
+  }
+);
 
-export const addPatient = createAsyncThunk('herobox/addPatient', async (patientData) => {
-  const response = await createPatient(patientData);
-  return response;
-});
+export const addPatientAsync = createAsyncThunk(
+  'patients/addPatient',
+  async (patientData, { dispatch }) => {
+    try {
+      const response = await createPatient(patientData);
+      // After a patient is added, fetch the updated list of patients
+      dispatch(getPatientsAsync());
+      return response;
+    } catch (error) {
+      throw error; // Let the calling code handle the error
+    }
+  }
+);
 
-const heroBoxSlice = createSlice({
-  name: 'herobox',
+const patientSlice = createSlice({
+  name: 'patients',
   initialState: {
     patients: [],
     status: 'idle',
@@ -23,21 +39,30 @@ const heroBoxSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getPatients.pending, (state) => {
+      .addCase(getPatientsAsync.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(getPatients.fulfilled, (state, action) => {
+      .addCase(getPatientsAsync.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.patients = action.payload;
       })
-      .addCase(getPatients.rejected, (state, action) => {
+      .addCase(getPatientsAsync.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
       })
-      .addCase(addPatient.fulfilled, (state, action) => {
-        state.patients.push(action.payload);
+      .addCase(addPatientAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(addPatientAsync.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        // Since we are refetching the patients list, we don't need to push the new patient here
+        // The new patient will be included in the refreshed list
+      })
+      .addCase(addPatientAsync.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
       });
   },
 });
 
-export default heroBoxSlice.reducer;
+export default patientSlice.reducer;

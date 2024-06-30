@@ -1,7 +1,7 @@
-// src/features/herobox/HeroBoxAPI.js
+const BASE_URL = 'http://localhost:5000/api/v1';
 
 export const fetchPatients = async () => {
-  const response = await fetch('http://localhost:5000/api/v1/patients');
+  const response = await fetch(`${BASE_URL}/patients`);
   if (!response.ok) {
     throw new Error('Failed to fetch patients');
   }
@@ -9,7 +9,9 @@ export const fetchPatients = async () => {
 };
 
 export const createPatient = async (patientData) => {
-  const response = await fetch('http://localhost:5000/api/v1/patients', {
+  console.log("patientData")
+  console.log(patientData)
+  const response = await fetch(`${BASE_URL}/patients`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

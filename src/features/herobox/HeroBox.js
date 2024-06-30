@@ -1,28 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { FaUserPlus, FaUsers, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUserPlus, FaUsers, FaMoneyBillWave, FaUserMd } from 'react-icons/fa';
 import Modal from 'react-modal';
-import { addPatientAsync } from '../patients/PatientsSlice';
-
+import { addPatientAsync} from './HeroBoxSlice';
+import {  getDoctorsAsync, addDoctorAsync } from './DoctorSlice';
+// doctorId
+// : 
+// "MUHAMMAD AYOUB - zs
 Modal.setAppElement('#root');
 
 const HeroBox = () => {
   const dispatch = useDispatch();
   const patients = useSelector((state) => state.patients.patients);
+  const doctors = useSelector((state) => state.doctors.doctors.data);
+  console.log(doctors)
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [doctorModalIsOpen, setDoctorModalIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [doctorId, setDoctorId] = useState(''); // Track selected doctorId for patient
+  const [doctorName, setDoctorName] = useState('');
+  const [specialist, setSpecialist] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('total');
   const [customRange, setCustomRange] = useState({ start: '', end: '' });
   const [showIncome, setShowIncome] = useState(false);
 
+  useEffect(() => {
+    dispatch(getDoctorsAsync()); // Fetch doctors on component mount
+  }, [dispatch]);
+
   const getTotalIncome = () => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let filteredPatients = patients.filter(patient => patient.status === 'out'); // Filter patients with status 'out'
+    let filteredPatients = patients.filter(patient => patient.status === 'out');
 
     if (selectedPeriod === 'day') {
       filteredPatients = filteredPatients.filter((patient) => {
@@ -72,16 +85,36 @@ const HeroBox = () => {
     setModalIsOpen(false);
   };
 
+  const openDoctorModal = () => {
+    setDoctorModalIsOpen(true);
+  };
+
+  const closeDoctorModal = () => {
+    setDoctorModalIsOpen(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(addPatientAsync({ name, contactNumber, address })).then(() => {
+    dispatch(addPatientAsync({ name, contactNumber, address, doctorId })).then(() => {
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000); // Show success message for 2 seconds
       setName('');
       setContactNumber('');
       setAddress('');
+      setDoctorId(''); // Reset doctorId after submission
     });
     closeModal();
+  };
+
+  const handleDoctorSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addDoctorAsync({ name: doctorName, specialist: specialist })).then(() => {
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000); // Show success message for 2 seconds
+      setDoctorName('');
+      setSpecialist('');
+    });
+    closeDoctorModal();
   };
 
   const handlePeriodChange = (e) => {
@@ -103,13 +136,21 @@ const HeroBox = () => {
 
   return (
     <div className="relative p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-blue-500 text-white p-8 rounded-lg flex items-center justify-between">
           <div>
             <FaUserPlus size={24} />
             <h3 className="text-lg font-bold">Add Patient</h3>
           </div>
           <button onClick={openModal} className="bg-white text-blue-500 px-6 py-2 rounded-lg hover:bg-blue-400 transition duration-300">Add</button>
+        </div>
+
+        <div className="bg-blue-500 text-white p-8 rounded-lg flex items-center justify-between">
+          <div>
+            <FaUserMd size={24} />
+            <h3 className="text-lg font-bold">Add Doctor</h3>
+          </div>
+          <button onClick={openDoctorModal} className="bg-white text-blue-500 px-6 py-2 rounded-lg hover:bg-blue-400 transition duration-300">Add</button>
         </div>
 
         <div className="bg-green-500 text-white p-8 rounded-lg flex items-center justify-between">
@@ -164,7 +205,7 @@ const HeroBox = () => {
 
       {showSuccess && (
         <div className="fixed top-0 left-0 right-0 p-4 bg-green-500 text-white text-center font-bold">
-          Patient added successfully!
+          {doctorName ? ' added successfully!' : ' added successfully!'}
         </div>
       )}
 
@@ -206,9 +247,58 @@ const HeroBox = () => {
               required
             />
           </label>
+          <label className="block mb-4">
+            Select Doctor:
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            >
+              <option value="">Select a Doctor</option>
+              {doctors?.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>{doctor.name} - {doctor.specialist}</option>
+              ))}
+            </select>
+          </label>
           <div className="flex justify-center space-x-4">
             <button type="submit" className="bg-blue-500 text-white px-6 py-3 rounded">Submit</button>
             <button type="button" onClick={closeModal} className="bg-red-500 text-white px-6 py-3 rounded">Cancel</button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={doctorModalIsOpen}
+        onRequestClose={closeDoctorModal}
+        className="bg-white p-6 rounded shadow-lg w-4/5 h-4/5 mx-auto my-10"
+        overlayClassName="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center"
+      >
+        <h2 className="text-2xl font-bold mb-4 text-center">Add Doctor</h2>
+        <form onSubmit={handleDoctorSubmit} className="space-y-4">
+          <label className="block mb-2">
+            Name:
+            <input
+              type="text"
+              value={doctorName}
+              onChange={(e) => setDoctorName(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Specialist:
+            <input
+              type="text"
+              value={specialist}
+              onChange={(e) => setSpecialist(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mt-1"
+              required
+            />
+          </label>
+          <div className="flex justify-center space-x-4">
+            <button type="submit" className="bg-blue-500 text-white px-6 py-3 rounded">Submit</button>
+            <button type="button" onClick={closeDoctorModal} className="bg-red-500 text-white px-6 py-3 rounded">Cancel</button>
           </div>
         </form>
       </Modal>
@@ -217,9 +307,6 @@ const HeroBox = () => {
 };
 
 export default HeroBox;
-
-
-
 
 
 
