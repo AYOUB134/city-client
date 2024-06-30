@@ -1,6 +1,6 @@
 // src/home/HomeAPI.js
 
-const API_URL = 'http://city-server-production.up.railway.app/api/v1/patients';
+const API_URL = 'https://city-server-production.up.railway.app/api/v1/patients';
 
 export const fetchPatients = async () => {
   const response = await fetch(API_URL);
