@@ -1,7 +1,7 @@
 // LoginAPI.js
 export const loginUser = async ({ email, password }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/v1/users');
+    const response = await fetch('http://city-server-production.up.railway.app/api/v1/users');
     if (!response.ok) {
       throw new Error('Network response was not ok.');
     }
