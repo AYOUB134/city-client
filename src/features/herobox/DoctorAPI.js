@@ -4,7 +4,7 @@ const BASE_URL = 'http://city-server-production.up.railway.app/api/v1';
 
 export const fetchDoctors = async () => {
   try {
-    const response = await fetch('http://localhost:5000/api/v1/doctors');
+    const response = await fetch('http://city-server-production.up.railway.app/api/v1/doctors');
     if (!response.ok) {
       throw new Error('Failed to fetch doctors');
     }
