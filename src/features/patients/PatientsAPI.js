@@ -1,7 +1,7 @@
 
 // src/features/patients/PatientsAPI.js
 
-const baseUrl = 'http://localhost:5000/api/v1/patients';
+const baseUrl = 'http://city-server-production.up.railway.app/api/v1/patients';
 
 export const fetchPatients = async () => {
   try {
