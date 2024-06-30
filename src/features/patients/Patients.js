@@ -32,22 +32,42 @@ const Patients = () => {
            admissionDate.getFullYear() === today.getFullYear();
   };
 
+  // const isCurrentWeek = (dateTime) => {
+  //   const admissionDate = new Date(dateTime);
+  //   const today = new Date();
+
+  //   // Get the start of the current week (Sunday)
+  //   const startOfWeek = new Date(today);
+  //   startOfWeek.setDate(today.getDate() - today.getDay());
+  //   startOfWeek.setHours(0, 0, 0, 0);
+
+  //   // Get the end of the current week (Saturday)
+  //   const endOfWeek = new Date(startOfWeek);
+  //   endOfWeek.setDate(startOfWeek.getDate() + 6);
+  //   endOfWeek.setHours(23, 59, 59, 999);
+
+  //   return admissionDate >= startOfWeek && admissionDate <= endOfWeek;
+  // };
+
+
+
   const isCurrentWeek = (dateTime) => {
     const admissionDate = new Date(dateTime);
     const today = new Date();
-
-    // Get the start of the current week (Sunday)
+  
+    // Get the start of the current week (Monday)
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
     startOfWeek.setHours(0, 0, 0, 0);
-
-    // Get the end of the current week (Saturday)
+  
+    // Get the end of the current week (Sunday)
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
-
+  
     return admissionDate >= startOfWeek && admissionDate <= endOfWeek;
   };
+  
 
   const isCurrentMonth = (dateTime) => {
     const admissionDate = new Date(dateTime);
@@ -82,7 +102,7 @@ const Patients = () => {
       case 'currentDay':
         return nameMatch && isCurrentDay(patient.admissionDate);
       case 'currentWeek':
-        return nameMatch && isCurrentWeek(patient.admissionDate);
+        return nameMatch && isCurrentWeek(patient.admissionDate); // Updated to filter for current week
       case 'currentMonth':
         return nameMatch && isCurrentMonth(patient.admissionDate);
       case 'currentYear':
@@ -157,22 +177,22 @@ const Patients = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Patients</h1>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-        <div className="w-full md:w-2/2 mb-4 md:mb-0">
+      <h1 className="text-3xl font-bold mb-6 text-center">Patients Management</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div className="w-full md:w-2/3 mb-4 md:mb-0">
           <input
             type="text"
             value={searchTerm}
             onChange={handleSearchChange}
             placeholder="Search by name..."
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
           />
         </div>
-        <div className="w-full md:w-1/2 flex items-center">
+        <div className="w-full md:w-1/3 flex items-center">
           <select
             value={filterType}
             onChange={handleFilterChange}
-            className="w-full md:w-auto p-2 border border-gray-300 rounded mr-2"
+            className="w-full md:w-auto p-3 border border-gray-300 rounded-lg mr-2 focus:outline-none"
           >
             <option value="all">All Patients</option>
             <option value="inPatients">In Patients</option>
@@ -188,57 +208,59 @@ const Patients = () => {
               <input
                 type="date"
                 onChange={handleStartDateChange}
-                className="p-2 border border-gray-300 rounded"
+                className="p-3 border border-gray-300 rounded-lg focus:outline-none"
               />
               <input
                 type="date"
                 onChange={handleEndDateChange}
-                className="p-2 border border-gray-300 rounded"
+                className="p-3 border border-gray-300 rounded-lg focus:outline-none"
               />
             </div>
           )}
         </div>
       </div>
-      {status === 'loading' && <p>Loading...</p>}
-      {status === 'failed' && <p>{error}</p>}
+      {status === 'loading' && <p className="text-center">Loading...</p>}
+      {status === 'failed' && <p className="text-center text-red-500">{error}</p>}
       {status === 'succeeded' && (
         <>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
+            <table className="w-full table-auto border-collapse border border-gray-300">
               <thead className="bg-gray-200">
                 <tr>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">No.</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Patient Name</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">To Dr.</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Contact</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Address</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Admission Date</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Discharge Date</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Status</th>
-                  <th className="border border-gray-300 px-2 md:px-4 py-2">Actions</th>
+                  <th className="border border-gray-300 px-4 py-2">No.</th>
+                  <th className="border border-gray-300 px-4 py-2">Patient Name</th>
+                  <th className="border border-gray-300 px-4 py-2">To Dr.</th>
+                  <th className="border border-gray-300 px-4 py-2">Contact</th>
+                  <th className="border border-gray-300 px-4 py-2">Address</th>
+                  <th className="border border-gray-300 px-4 py-2">Admission Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Discharge Date</th>
+                  <th className="border border-gray-300 px-4 py-2">Status</th>
+                  <th className="border border-gray-300 px-4 py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredPatients.map((patient, index) => (
-                  <tr key={patient._id}>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">{index + 1}</td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">{patient.name}</td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">{patient.doctorId}</td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">{patient.contactNumber}</td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">{patient.address}</td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">{formatDateTime(patient.admissionDate)}</td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
+                  <tr key={patient._id} className={`hover:bg-gray-100 ${patient.status === 'in' ? 'bg-green-100' : 'bg-red-100'}`}>
+                    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                    <td className="border border-gray-300 px-4 py-2">{patient.name}</td>
+                    <td className="border border-gray-300 px-4 py-2">{patient.doctorId}</td>
+                    <td className="border border-gray-300 px-4 py-2">{patient.contactNumber}</td>
+                    <td className="border border-gray-300 px-4 py-2">{patient.address}</td>
+                    <td className="border border-gray-300 px-4 py-2">{formatDateTime(patient.admissionDate)}</td>
+                    <td className="border border-gray-300 px-4 py-2">
                       {patient.status === 'out' ? formatDateTime(patient.dischargeDate) : 'N/A'}
                     </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
-                      <span className={`px-2 py-1 rounded ${patient.status === 'in' ? 'bg-green-200' : 'bg-red-200'}`}>
+                    <td className="border border-gray-300 px-4 py-2">
+                      <span className={`px-2 py-1 rounded ${
+                        patient.status === 'in' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                      }`}>
                         {patient.status}
                       </span>
                     </td>
-                    <td className="border border-gray-300 px-2 md:px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2">
                       <button
                         onClick={() => openModal(patient)}
-                        className="bg-blue-500 text-white px-3 md:px-4 py-1 rounded"
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded focus:outline-none"
                       >
                         Edit
                       </button>
@@ -260,7 +282,7 @@ const Patients = () => {
       <Modal
         isOpen={!!editingPatient}
         onRequestClose={closeModal}
-        className="bg-white p-4 md:p-6 rounded shadow-lg w-full max-w-md mx-auto my-10"
+        className="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full max-w-md mx-auto my-10"
         overlayClassName="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center"
       >
         <h2 className="text-2xl font-bold mb-4 text-center">Edit Patient</h2>
@@ -273,7 +295,7 @@ const Patients = () => {
                 name="name"
                 value={editingPatient.name}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
                 required
                 disabled={editingPatient.status === 'out'}
               />
@@ -285,7 +307,7 @@ const Patients = () => {
                 name="doctorId"
                 value={editingPatient.doctorId}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
                 required
                 disabled={editingPatient.status === 'out'}
               />
@@ -297,7 +319,7 @@ const Patients = () => {
                 name="contactNumber"
                 value={editingPatient.contactNumber}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
                 required
                 disabled={editingPatient.status === 'out'}
               />
@@ -309,7 +331,7 @@ const Patients = () => {
                 name="address"
                 value={editingPatient.address}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
                 required
                 disabled={editingPatient.status === 'out'}
               />
@@ -321,7 +343,7 @@ const Patients = () => {
                 name="bill"
                 value={editingPatient.bill}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
                 required
                 disabled={editingPatient.status === 'out'}
               />
@@ -332,7 +354,7 @@ const Patients = () => {
                 name="status"
                 value={editingPatient.status}
                 onChange={handleInputChange}
-                className="w-full p-2 border border-gray-300 rounded mt-1"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none"
                 disabled={editingPatient.status === 'out'}
               >
                 <option value="in">In</option>
@@ -340,8 +362,12 @@ const Patients = () => {
               </select>
             </label>
             <div className="flex justify-center space-x-4">
-              <button type="submit" className="bg-blue-500 text-white px-6 py-2 rounded">Submit</button>
-              <button type="button" onClick={closeModal} className="bg-red-500 text-white px-6 py-2 rounded">Cancel</button>
+              <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg focus:outline-none">
+                Submit
+              </button>
+              <button type="button" onClick={closeModal} className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg focus:outline-none">
+                Cancel
+              </button>
             </div>
           </form>
         )}
@@ -351,6 +377,10 @@ const Patients = () => {
 };
 
 export default Patients;
+
+
+
+
 
 
 
