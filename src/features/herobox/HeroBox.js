@@ -2,25 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaUserPlus, FaUsers, FaMoneyBillWave, FaUserMd } from 'react-icons/fa';
 import Modal from 'react-modal';
-import { addPatientAsync} from './HeroBoxSlice';
-import {  getDoctorsAsync, addDoctorAsync } from './DoctorSlice';
-// doctorId
-// : 
-// "MUHAMMAD AYOUB - zs
+import { addPatientAsync } from './HeroBoxSlice';
+import { getDoctorsAsync, addDoctorAsync } from './DoctorSlice';
+
 Modal.setAppElement('#root');
 
 const HeroBox = () => {
   const dispatch = useDispatch();
   const patients = useSelector((state) => state.patients.patients);
   const doctors = useSelector((state) => state.doctors.doctors.data);
-  console.log(doctors)
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [doctorModalIsOpen, setDoctorModalIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [address, setAddress] = useState('');
-  const [doctorId, setDoctorId] = useState(''); // Track selected doctorId for patient
+  const [doctorId, setDoctorId] = useState('');
   const [doctorName, setDoctorName] = useState('');
   const [specialist, setSpecialist] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -29,13 +26,13 @@ const HeroBox = () => {
   const [showIncome, setShowIncome] = useState(false);
 
   useEffect(() => {
-    dispatch(getDoctorsAsync()); // Fetch doctors on component mount
+    dispatch(getDoctorsAsync());
   }, [dispatch]);
 
   const getTotalIncome = () => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let filteredPatients = patients.filter(patient => patient.status === 'out');
+    let filteredPatients = patients.filter((patient) => patient.status === 'out');
 
     if (selectedPeriod === 'day') {
       filteredPatients = filteredPatients.filter((patient) => {
@@ -44,11 +41,16 @@ const HeroBox = () => {
       });
     } else if (selectedPeriod === 'week') {
       const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
+      const day = startOfWeek.getDay();
+      const diff = (day === 0 ? 6 : day - 1); // Adjust to Monday (0 is Sunday, 1 is Monday, ..., 6 is Saturday)
+      startOfWeek.setDate(now.getDate() - diff);
       startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
       filteredPatients = filteredPatients.filter((patient) => {
         const dischargeDate = new Date(patient.dischargeDate);
-        return dischargeDate >= startOfWeek && dischargeDate <= now;
+        return dischargeDate >= startOfWeek && dischargeDate <= endOfWeek;
       });
     } else if (selectedPeriod === 'month') {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -59,6 +61,7 @@ const HeroBox = () => {
     } else if (selectedPeriod === 'lastMonth') {
       const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      endOfLastMonth.setHours(23, 59, 59, 999); // Set to the end of the last day of the last month
       filteredPatients = filteredPatients.filter((patient) => {
         const dischargeDate = new Date(patient.dischargeDate);
         return dischargeDate >= startOfLastMonth && dischargeDate <= endOfLastMonth;
@@ -97,11 +100,11 @@ const HeroBox = () => {
     e.preventDefault();
     dispatch(addPatientAsync({ name, contactNumber, address, doctorId })).then(() => {
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000); // Show success message for 2 seconds
+      setTimeout(() => setShowSuccess(false), 2000);
       setName('');
       setContactNumber('');
       setAddress('');
-      setDoctorId(''); // Reset doctorId after submission
+      setDoctorId('');
     });
     closeModal();
   };
@@ -110,7 +113,7 @@ const HeroBox = () => {
     e.preventDefault();
     dispatch(addDoctorAsync({ name: doctorName, specialist: specialist })).then(() => {
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000); // Show success message for 2 seconds
+      setTimeout(() => setShowSuccess(false), 2000);
       setDoctorName('');
       setSpecialist('');
     });
@@ -119,15 +122,15 @@ const HeroBox = () => {
 
   const handlePeriodChange = (e) => {
     setSelectedPeriod(e.target.value);
-    setShowIncome(false); // Reset to obscured income when period changes
+    setShowIncome(false);
   };
 
   const handleCustomRangeChange = (e) => {
     setCustomRange({
       ...customRange,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setShowIncome(false); // Reset to obscured income when custom range changes
+    setShowIncome(false);
   };
 
   const toggleIncomeVisibility = () => {
@@ -142,7 +145,12 @@ const HeroBox = () => {
             <FaUserPlus size={24} />
             <h3 className="text-lg font-bold">Add Patient</h3>
           </div>
-          <button onClick={openModal} className="bg-white text-blue-500 px-6 py-2 rounded-lg hover:bg-blue-400 transition duration-300">Add</button>
+          <button
+            onClick={openModal}
+            className="bg-white text-blue-500 px-6 py-2 rounded-lg hover:bg-blue-400 transition duration-300"
+          >
+            Add
+          </button>
         </div>
 
         <div className="bg-blue-500 text-white p-8 rounded-lg flex items-center justify-between">
@@ -150,7 +158,12 @@ const HeroBox = () => {
             <FaUserMd size={24} />
             <h3 className="text-lg font-bold">Add Doctor</h3>
           </div>
-          <button onClick={openDoctorModal} className="bg-white text-blue-500 px-6 py-2 rounded-lg hover:bg-blue-400 transition duration-300">Add</button>
+          <button
+            onClick={openDoctorModal}
+            className="bg-white text-blue-500 px-6 py-2 rounded-lg hover:bg-blue-400 transition duration-300"
+          >
+            Add
+          </button>
         </div>
 
         <div className="bg-green-500 text-white p-8 rounded-lg flex items-center justify-between">
@@ -166,7 +179,11 @@ const HeroBox = () => {
             <FaMoneyBillWave size={24} />
             <h3 className="text-lg font-bold">Income</h3>
           </div>
-          <select value={selectedPeriod} onChange={handlePeriodChange} className="mt-4 mb-2 px-4 py-2 rounded text-black">
+          <select
+            value={selectedPeriod}
+            onChange={handlePeriodChange}
+            className="mt-4 mb-2 px-4 py-2 rounded text-black"
+          >
             <option value="total">Total Income</option>
             <option value="day">Today's Income</option>
             <option value="week">This Week's Income</option>
@@ -205,7 +222,7 @@ const HeroBox = () => {
 
       {showSuccess && (
         <div className="fixed top-0 left-0 right-0 p-4 bg-green-500 text-white text-center font-bold">
-          {doctorName ? ' added successfully!' : ' added successfully!'}
+          {doctorName ? 'Doctor added successfully!' : 'Patient added successfully!'}
         </div>
       )}
 
@@ -257,7 +274,9 @@ const HeroBox = () => {
             >
               <option value="">Select a Doctor</option>
               {doctors?.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>{doctor.name} - {doctor.specialist}</option>
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.name} - {doctor.specialist}
+                </option>
               ))}
             </select>
           </label>
@@ -307,7 +326,6 @@ const HeroBox = () => {
 };
 
 export default HeroBox;
-
 
 
 
