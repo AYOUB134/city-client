@@ -275,7 +275,7 @@ const HeroBox = () => {
 
       {showSuccess && (
         <div className="fixed top-0 left-0 right-0 p-4 bg-green-500 text-white text-center font-bold">
-          {doctorName ? 'Doctor added successfully!' : 'Patient added successfully!'}
+          {doctorName ? 'Doctor added successfully!' : ' added successfully!'}
         </div>
       )}
 
